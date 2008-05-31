@@ -24,7 +24,7 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.11 $Rev$ - Added timeout functionality, and removed withFriends while Twitter works out API changes
+ * @version 1.11 - Added timeout functionality, and removed withFriends while Twitter works out API changes
  * @date $Date$
  */
 
