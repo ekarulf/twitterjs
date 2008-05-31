@@ -1,7 +1,7 @@
 /**
- * @author  remy sharp / http://remysharp.com
- * @url     http://remysharp.com/2007/05/18/add-twitter-to-your-blog-step-by-step/
- * @usage   See examples at URL or in test.html (if checked out from svn)
+ * remy sharp / http://remysharp.com
+ * http://remysharp.com/2007/05/18/add-twitter-to-your-blog-step-by-step/
+ *
  * @params
  *   cssIdOfContainer: e.g. twitters
  *   options: 
@@ -23,10 +23,9 @@
  *
  *       }
  *
- * @license Creative Commons License - ShareAlike http://creativecommons.org/licenses/by-sa/3.0/
- * @version 1.11 ($Rev$) - Added timeout functionality, and removed withFriends while Twitter works out API changes
- * // Twitter with friends problem: http://getsatisfaction.com/twitter/topics/friends_timeline_api_call_suddenly_requires_auth
- * @updated $Date$
+ * @license MIT (MIT-LICENSE.txt)
+ * @version 1.11 ($Revision$) - Added timeout functionality, and removed withFriends while Twitter works out API changes
+ * @date $Date$
  */
 
 // to protect variables from resetting if included more than once
@@ -150,6 +149,7 @@ if (typeof renderTwitters != 'function') (function () {
         }
         
         // Hack to disable withFriends, twitter changed their API so this requires auth
+        // http://getsatisfaction.com/twitter/topics/friends_timeline_api_call_suddenly_requires_auth
         if (options.withFriends) options.withFriends = false;
 
         // need to make these global since we can't pass in to the twitter callback
