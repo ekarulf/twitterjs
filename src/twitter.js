@@ -182,7 +182,7 @@ if (typeof renderTwitters != 'function') (function () {
                         // cancel callback
                         if (options.onTimeoutCancel) window['twitterCallback' + guid] = function () {};
                         options.onTimeout.call(document.getElementById(options.twitterTarget));
-                    }, options.timeout);
+                    }, options.timeout * 1000);
                 }
                 
                 var script = document.createElement('script');
