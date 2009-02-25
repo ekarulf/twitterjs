@@ -24,7 +24,7 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.11.3 - Tweaked relative date and linkify to match Twitter.com usage
+ * @version 1.12 - Tweaked relative date and linkify to match Twitter.com usage
  * @date $Date$
  */
 
