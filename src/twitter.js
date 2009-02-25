@@ -24,7 +24,7 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.11 - Added timeout functionality, and removed withFriends while Twitter works out API changes
+ * @version 1.11.3 - Tweaked relative date and linkify to match Twitter.com usage
  * @date $Date$
  */
 
@@ -270,38 +270,99 @@ if (typeof renderTwitters != 'function') (function () {
     }
     
     function relative_time(time_value) {
-        var values = time_value.split(" ");
-        time_value = values[1] + " " + values[2] + ", " + values[5] + " " + values[3];
-        var parsed_date = Date.parse(time_value);
-        var relative_to = (arguments.length > 1) ? arguments[1] : new Date();
-        var delta = parseInt((relative_to.getTime() - parsed_date) / 1000);
+        var values = time_value.split(" "),
+            parsed_date = Date.parse(values[1] + " " + values[2] + ", " + values[5] + " " + values[3]),
+            date = new Date(parsed_date),
+            relative_to = (arguments.length > 1) ? arguments[1] : new Date(),
+            delta = parseInt((relative_to.getTime() - parsed_date) / 1000),
+            r = '';
+        
+        function formatTime(date) {
+            var hour = date.getHours(),
+                min = date.getMinutes() + "",
+                ampm = 'AM';
+            
+            if (hour == 0) {
+                hour = 12;
+            } else if (hour > 12) {
+                hour -= 12;
+                ampm = 'PM';
+            }
+            
+            if (min.length == 1) {
+                min = '0' + min;
+            }
+            
+            return hour + ':' + min + ' ' + ampm;
+        }
+        
+        function formatDate(date) {
+            var ds = date.toDateString().split(/ /),
+                mon = ds[1],
+                day = ds[2],
+                dayi = parseInt(day),
+                year = date.getFullYear(),
+                thisyear = (new Date()).getFullYear(),
+                th = 'th';
+            
+            // anti-'th' - but don't do the 11th, 12th or 13th
+            if ((dayi % 10) == 1 && day.substr(0, 1) != '1') {
+                th = 'st';
+            } else if ((dayi % 10) == 2 && day.substr(0, 1) != '1') {
+                th = 'nd';
+            } else if ((dayi % 10) == 3 && day.substr(0, 1) != '1') {
+                th = 'rd';
+            }
+            
+            if (day.substr(0, 1) == '0') {
+                day = day.substr(1);
+            }
+            
+            return mon + ' ' + day + th + (thisyear != year ? ', ' + year : '');
+        }
+        
         delta = delta + (relative_to.getTimezoneOffset() * 60);
 
-        var r = '';
-        if (delta < 60) {
+        if (delta < 5) {
+            r = 'less than 5 seconds ago';
+        } else if (delta < 30) {
+            r = 'half a minute ago';
+        } else if (delta < 60) {
             r = 'less than a minute ago';
-        } else if(delta < 120) {
-            r = 'about a minute ago';
-        } else if(delta < (45*60)) {
+        } else if (delta < 120) {
+            r = '1 minute ago';
+        } else if (delta < (45*60)) {
             r = (parseInt(delta / 60)).toString() + ' minutes ago';
-        } else if(delta < (2*90*60)) { // 2* because sometimes read 1 hours ago
-            r = 'about an hour ago';
-        } else if(delta < (24*60*60)) {
+        } else if (delta < (2*90*60)) { // 2* because sometimes read 1 hours ago
+            r = 'about 1 hour ago';
+        } else if (delta < (24*60*60)) {
             r = 'about ' + (parseInt(delta / 3600)).toString() + ' hours ago';
-        } else if(delta < (48*60*60)) {
-            r = '1 day ago';
         } else {
-            r = (parseInt(delta / 86400)).toString() + ' days ago';
+            if (delta < (48*60*60)) {
+                r = formatTime(date) + ' yesterday';
+            } else {
+                r = formatTime(date) + ' ' + formatDate(date);
+                // r = (parseInt(delta / 86400)).toString() + ' days ago';
+            }
         }
 
         return r;
     }
-
+    
     function linkify(s) {
+        var entities = {
+            '"' : '&quot;',
+            '&' : '&amp;',
+            '<' : '&lt;',
+            '>' : '&gt'
+        };
+        
         return s.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+/g, function(m) {
             return m.link(m);
-        }).replace(/@[\S]+/g, function(m) {
-            return '<a href="http://twitter.com/' + m.substr(1) + '">' + m + '</a>';
+        }).replace(/(^|[^\w])(@[\d\w\-]+)/g, function(d, m1, m2) {
+            return m1 + '@<a href="http://twitter.com/' + m2.substr(1) + '">' + m2.substr(1) + '</a>';
+        }).replace(/"&<>/, function (m) {
+            return entities[m];
         });
     }
 })();
