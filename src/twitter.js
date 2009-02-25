@@ -354,7 +354,7 @@ if (typeof renderTwitters != 'function') (function () {
             '"' : '&quot;',
             '&' : '&amp;',
             '<' : '&lt;',
-            '>' : '&gt'
+            '>' : '&gt;'
         };
         
         return s.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+/g, function(m) {
