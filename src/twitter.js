@@ -24,7 +24,7 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.12 - Tweaked relative date and linkify to match Twitter.com usage
+ * @version 1.12.2 - Fixed Safari 4 returning blank by using simple cache busting
  * @date $Date$
  */
 
@@ -175,7 +175,7 @@ if (typeof renderTwitters != 'function') (function () {
                     return;
                 }
                 
-                var url = 'http://www.twitter.com/statuses/' + (options.withFriends ? 'friends_timeline' : 'user_timeline') + '/' + id + '.json?callback=twitterCallback' + guid + '&count=20';
+                var url = 'http://www.twitter.com/statuses/' + (options.withFriends ? 'friends_timeline' : 'user_timeline') + '/' + id + '.json?callback=twitterCallback' + guid + '&count=20&cb=' + Math.random();
 
                 if (options.timeout) {
                     window['twitterTimeout' + guid] = setTimeout(function () {
