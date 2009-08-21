@@ -14,7 +14,8 @@
         clearContents: false, // leave the original message in place
         count: 10, 
         withFriends: true,
-        ignoreReplies: false
+        ignoreReplies: false,
+        newwindow: true,
     });
     
     getTwitters('remysTweets2', {
@@ -28,12 +29,12 @@
     });
 
     getTwitters('johnsTweets', {
-        id: 'jeresig', 
-        count: 1, 
+        id: 'codepo8', 
+        count: 20, 
         withFriends: true, // currently disabled due to change in Twitter API
-        enableLinks: false, 
+        enableLinks: true, 
         ignoreReplies: true,
-        template: '<span class="twitterPrefix"><img height="16" width="16" src="%user_profile_image_url%" /> <span class="twitterStatus">"%text%"</span> <em class="twitterTime"><a href="http://twitter.com/%user_screen_name%/statuses/%id%">%time%</a></em>'
+        template: '<span class="twitterPrefix"><img height="16" width="16" src="%user_profile_image_url%" /> <span class="twitterStatus">%text%</span> <em class="twitterTime"><a href="http://twitter.com/%user_screen_name%/statuses/%id%">%time%</a></em>'
     });
     </script>
   </head>

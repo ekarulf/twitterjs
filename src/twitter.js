@@ -13,6 +13,7 @@
  *           ignoreReplies: {Boolean}, skips over tweets starting with '@', defaults to false
  *           template: {String} HTML template to use for LI element (see URL above for examples), defaults to predefined template
  *           enableLinks: {Boolean} linkifies text, defaults to true,
+ *           newwindow {Boolean} opens links in new window, defaults to false
  *           timeout: {Int} How long before triggering onTimeout, defaults to 10 seconds if onTimeout is set
  *           onTimeoutCancel: {Boolean} Completely cancel twitter call if timedout, defaults to false
  *           onTimeout: {Function} Function to run when the timeout occurs. Function is bound to element specified with 
@@ -24,23 +25,54 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.12.2 - Fixed Safari 4 returning blank by using simple cache busting
+ * @version 1.13 - Allow links to popup, and linkify hashtags
  * @date $Date$
  */
 
 // to protect variables from resetting if included more than once
 if (typeof renderTwitters != 'function') (function () {
+    // based on Dustin Diaz's ify, but with my fixes :-P
+    var ify = function() {
+      var entities = {
+          '"' : '&quot;',
+          '&' : '&amp;',
+          '<' : '&lt;',
+          '>' : '&gt;'
+      };
+
+      return {
+        "link": function(t) {
+          return t.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+[^\.,\)\s*$]/g, function(m) {
+            return '<a href="' + m + '">' + ((m.length > 25) ? m.substr(0, 24) + '...' : m) + '</a>';
+          });
+        },
+        "at": function(t) {
+          return t.replace(/(^|[^\w]+)\@([a-zA-Z0-9_]{1,15})/g, function(m, m1, m2) {
+            return m1 + '@<a href="http://twitter.com/' + m2 + '">' + m2 + '</a>';
+          });
+        },
+        "hash": function(t) {
+          return t.replace(/(^|[^\w]+)\#([a-zA-Z0-9_]+)/g, function(m, m1, m2) {
+            return m1 + '#<a href="http://search.twitter.com/search?q=%23' + m2 + '">' + m2 + '</a>';
+          });
+        },
+        "clean": function(tweet) {
+          return this.hash(this.at(this.link(tweet)));
+        }
+      };
+    }();
+    
     /** Private variables */
     var browser = (function() {
-    	var b = navigator.userAgent.toLowerCase();
+        var b = navigator.userAgent.toLowerCase();
 
-    	// Figure out what browser is being used
-    	return {
-    		safari: /webkit/.test(b),
-    		opera: /opera/.test(b),
-    		msie: /msie/.test(b) && !(/opera/).test(b),
-    		mozilla: /mozilla/.test(b) && !(/(compatible|webkit)/).test(b)
-    	};
+        // Figure out what browser is being used
+        return {
+            safari: /webkit/.test(b),
+            opera: /opera/.test(b),
+            msie: /msie/.test(b) && !(/opera/).test(b),
+            mozilla: /mozilla/.test(b) && !(/(compatible|webkit)/).test(b)
+        };
     })();
 
     var guid = 0;
@@ -78,7 +110,7 @@ if (typeof renderTwitters != 'function') (function () {
             if (options.template) {
                 li.innerHTML = options.template.replace(/%([a-z_\-\.]*)%/ig, function (m, l) {
                     var r = data[l] + "" || "";
-                    if (l == 'text' && options.enableLinks) r = linkify(r);
+                    if (l == 'text' && options.enableLinks) r = ify.clean(r);
                     return r;
                 });
             } else {
@@ -89,7 +121,7 @@ if (typeof renderTwitters != 'function') (function () {
                 statusSpan.innerHTML = obj[i].text; // forces the entities to be converted correctly
 
                 if (options.enableLinks == true) {
-                    statusSpan.innerHTML = linkify(statusSpan.innerHTML);
+                    statusSpan.innerHTML = ify.clean(statusSpan.innerHTML);
                 }
 
                 timeSpan.innerHTML = relative_time(obj[i].created_at);
@@ -107,6 +139,10 @@ if (typeof renderTwitters != 'function') (function () {
                 li.appendChild(statusSpan);
                 li.appendChild(text(' '));
                 li.appendChild(timeSpan);
+            }
+            
+            if (options.newwindow) {
+                li.innerHTML = li.innerHTML.replace(/<a href/gi, '<a target="_blank" href');
             }
             
             ul.appendChild(li);
@@ -347,22 +383,5 @@ if (typeof renderTwitters != 'function') (function () {
         }
 
         return r;
-    }
-    
-    function linkify(s) {
-        var entities = {
-            '"' : '&quot;',
-            '&' : '&amp;',
-            '<' : '&lt;',
-            '>' : '&gt;'
-        };
-        
-        return s.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+/g, function(m) {
-            return m.link(m);
-        }).replace(/(^|[^\w])(@[\d\w\-]+)/g, function(d, m1, m2) {
-            return m1 + '@<a href="http://twitter.com/' + m2.substr(1) + '">' + m2.substr(1) + '</a>';
-        }).replace(/"&<>/, function (m) {
-            return entities[m];
-        });
     }
 })();
