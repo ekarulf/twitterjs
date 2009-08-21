@@ -17,7 +17,7 @@
  *           timeout: {Int} How long before triggering onTimeout, defaults to 10 seconds if onTimeout is set
  *           onTimeoutCancel: {Boolean} Completely cancel twitter call if timedout, defaults to false
  *           onTimeout: {Function} Function to run when the timeout occurs. Function is bound to element specified with 
- *              cssIdOfContainer (i.e. 'this' keyword)
+ *           cssIdOfContainer (i.e. 'this' keyword)
  *
  *      CURRENTLY DISABLED DUE TO CHANGE IN TWITTER API:
  *           withFriends: {Boolean} includes friend's status
