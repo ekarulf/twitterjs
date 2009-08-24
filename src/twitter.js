@@ -25,7 +25,7 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.13 - Allow links to popup, and linkify hashtags
+ * @version 1.13.1 - Fixed linkifying trailing colons and fixed hashtags appearing in strings (which shouldn't be)
  * @date $Date$
  */
 
@@ -42,7 +42,7 @@ if (typeof renderTwitters != 'function') (function () {
 
       return {
         "link": function(t) {
-          return t.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+[^\.,\)\s*$]/g, function(m) {
+          return t.replace(/[a-z]+:\/\/[a-z0-9-_]+\.[a-z0-9-_:%&\?\/.=]+[^:\.,\)\s*$]/ig, function(m) {
             return '<a href="' + m + '">' + ((m.length > 25) ? m.substr(0, 24) + '...' : m) + '</a>';
           });
         },
@@ -52,7 +52,7 @@ if (typeof renderTwitters != 'function') (function () {
           });
         },
         "hash": function(t) {
-          return t.replace(/(^|[^\w]+)\#([a-zA-Z0-9_]+)/g, function(m, m1, m2) {
+          return t.replace(/(^|[^\w'"]+)\#([a-zA-Z0-9_]+)/g, function(m, m1, m2) {
             return m1 + '#<a href="http://search.twitter.com/search?q=%23' + m2 + '">' + m2 + '</a>';
           });
         },
