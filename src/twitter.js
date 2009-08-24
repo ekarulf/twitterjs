@@ -1,5 +1,6 @@
 /**
  * remy sharp / http://remysharp.com
+ * Twitter / @rem
  * http://remysharp.com/2007/05/18/add-twitter-to-your-blog-step-by-step/
  *
  * @params
