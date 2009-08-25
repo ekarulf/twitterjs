@@ -19,6 +19,7 @@
  *           onTimeoutCancel: {Boolean} Completely cancel twitter call if timedout, defaults to false
  *           onTimeout: {Function} Function to run when the timeout occurs. Function is bound to element specified with 
  *           cssIdOfContainer (i.e. 'this' keyword)
+ *           callback: {Function} Callback function once the render is complete, doesn't fire on timeout
  *
  *      CURRENTLY DISABLED DUE TO CHANGE IN TWITTER API:
  *           withFriends: {Boolean} includes friend's status
@@ -26,14 +27,37 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.13.1 - Fixed linkifying trailing colons and fixed hashtags appearing in strings (which shouldn't be)
+ * @version 1.13.1 - Number of fixes to ify, and fixed date parsing in Opera and 12AM issue
  * @date $Date$
  */
 
 // to protect variables from resetting if included more than once
 if (typeof renderTwitters != 'function') (function () {
-    // based on Dustin Diaz's ify, but with my fixes :-P
-    var ify = function() {
+    /** Private variables */
+    
+    // only used for the DOM ready, since IE & Safari require special conditions
+    var browser = (function() {
+        var b = navigator.userAgent.toLowerCase();
+
+        // Figure out what browser is being used
+        return {
+            webkit: /(webkit|khtml)/.test(b),
+            opera: /opera/.test(b),
+            msie: /msie/.test(b) && !(/opera/).test(b),
+            mozilla: /mozilla/.test(b) && !(/(compatible|webkit)/).test(b)
+        };
+    })();
+
+    var guid = 0;
+    var readyList = [];
+    var isReady = false;
+    
+    var monthDict = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    /** Global functions */
+    
+    // based on Dustin Diaz's ify, but with my fixes :-)
+    window.ify = function() {
       var entities = {
           '"' : '&quot;',
           '&' : '&amp;',
@@ -43,7 +67,7 @@ if (typeof renderTwitters != 'function') (function () {
 
       return {
         "link": function(t) {
-          return t.replace(/[a-z]+:\/\/[a-z0-9-_]+\.[a-z0-9-_:%&\?\/.=]+[^:\.,\)\s*$]/ig, function(m) {
+          return t.replace(/[a-z]+:\/\/[a-z0-9-_]+\.[a-z0-9-_:~%&\?\/.=]+[^:\.,\)\s*$]/ig, function(m) {
             return '<a href="' + m + '">' + ((m.length > 25) ? m.substr(0, 24) + '...' : m) + '</a>';
           });
         },
@@ -62,25 +86,6 @@ if (typeof renderTwitters != 'function') (function () {
         }
       };
     }();
-    
-    /** Private variables */
-    var browser = (function() {
-        var b = navigator.userAgent.toLowerCase();
-
-        // Figure out what browser is being used
-        return {
-            safari: /webkit/.test(b),
-            opera: /opera/.test(b),
-            msie: /msie/.test(b) && !(/opera/).test(b),
-            mozilla: /mozilla/.test(b) && !(/(compatible|webkit)/).test(b)
-        };
-    })();
-
-    var guid = 0;
-    var readyList = [];
-    var isReady = false;
-    
-    /** Global functions */
     
     // to create a public function within our private scope, we attach the 
     // the function to the window object
@@ -156,11 +161,14 @@ if (typeof renderTwitters != 'function') (function () {
         }
 
         target.appendChild(ul);
+        
+        if (typeof options.callback == 'function') {
+            options.callback();
+        }
     };
     
     window.getTwitters = function (target, id, count, options) {
         guid++;
-        
 
         if (typeof id == 'object') {
             options = id;
@@ -264,7 +272,7 @@ if (typeof renderTwitters != 'function') (function () {
 
     // ready and browser adapted from John Resig's jQuery library (http://jquery.com)
     function DOMReady() {
-        if ( browser.mozilla || browser.opera ) {
+        if ( document.addEventListener && !browser.webkit ) {
             document.addEventListener( "DOMContentLoaded", fireReady, false );
         } else if ( browser.msie ) {
             // If IE is used, use the excellent hack by Matthias Miller
@@ -288,8 +296,7 @@ if (typeof renderTwitters != 'function') (function () {
             // Clear from memory
             script = null;
 
-            // If Safari  is used
-        } else if ( browser.safari ) {
+        } else if ( browser.webkit ) {
             // Continually check to see if the document.readyState is valid
             var safariTimer = setInterval(function () {
                 // loaded and complete are both valid states
@@ -321,6 +328,8 @@ if (typeof renderTwitters != 'function') (function () {
             
             if (hour == 0) {
                 hour = 12;
+            } else if (hour == 12) {
+                ampm = 'PM';
             } else if (hour > 12) {
                 hour -= 12;
                 ampm = 'PM';
@@ -335,8 +344,8 @@ if (typeof renderTwitters != 'function') (function () {
         
         function formatDate(date) {
             var ds = date.toDateString().split(/ /),
-                mon = ds[1],
-                day = ds[2],
+                mon = monthDict[date.getMonth()],
+                day = date.getDate()+'',
                 dayi = parseInt(day),
                 year = date.getFullYear(),
                 thisyear = (new Date()).getFullYear(),
