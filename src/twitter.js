@@ -27,7 +27,7 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.13.1 - Number of fixes to ify, and fixed date parsing in Opera and 12AM issue
+ * @version 1.13.2 - ify now supports lists
  * @date $Date$
  */
 
@@ -72,7 +72,7 @@ if (typeof renderTwitters != 'function') (function () {
           });
         },
         "at": function(t) {
-          return t.replace(/(^|[^\w]+)\@([a-zA-Z0-9_]{1,15})/g, function(m, m1, m2) {
+          return t.replace(/(^|[^\w]+)\@([a-zA-Z0-9_]{1,15}(\/[a-zA-Z0-9-_]+)*)/g, function(m, m1, m2) {
             return m1 + '@<a href="http://twitter.com/' + m2 + '">' + m2 + '</a>';
           });
         },
