@@ -27,7 +27,7 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.13.3 - ify now supports lists
+ * @version 1.13.3.2 - twitter request count now considers ignoreReplies
  * @date $Date$
  */
 
@@ -53,6 +53,7 @@ if (typeof renderTwitters != 'function') (function () {
     var isReady = false;
     
     var monthDict = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var maxTimeline = 200;
     
     /** Global functions */
     
@@ -192,6 +193,9 @@ if (typeof renderTwitters != 'function') (function () {
         if (typeof options.clearContents == 'undefined') {
             options.clearContents = true;
         }
+        
+        // Hack to try and grab as many tweets as possible without displaying replies
+        count = options.ignoreReplies ? maxTimeline : count;
         
         // Hack to disable withFriends, twitter changed their API so this requires auth
         // http://getsatisfaction.com/twitter/topics/friends_timeline_api_call_suddenly_requires_auth
