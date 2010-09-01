@@ -18,6 +18,8 @@
  *           timeout: {Int} How long before triggering onTimeout, defaults to 10 seconds if onTimeout is set
  *           onTimeoutCancel: {Boolean} Completely cancel twitter call if timedout, defaults to false
  *           onTimeout: {Function} Function to run when the timeout occurs. Function is bound to element specified with 
+ *           trimUser: {Boolean} false, does not request additional information about the user
+ *           includeEntities: {Boolean} true, offers a variety of metadata about the tweet in a discreet structure
  *           cssIdOfContainer (i.e. 'this' keyword)
  *           callback: {Function} Callback function once the render is complete, doesn't fire on timeout
  *
@@ -27,7 +29,7 @@
  *       }
  *
  * @license MIT (MIT-LICENSE.txt)
- * @version 1.13.3.2 - twitter request count now considers ignoreReplies
+ * @version 1.14.0 - support for new api endpoint
  * @date $Date$
  */
 
@@ -194,6 +196,14 @@ if (typeof renderTwitters != 'function') (function () {
             options.clearContents = true;
         }
         
+        if (typeof options.trimUser == 'undefined') {
+            options.trimUser = false;
+        }
+
+        if (typeof options.includeEntities == 'undefined') {
+            options.includeEntities = false;
+        }
+        
         // Hack to try and grab as many tweets as possible without displaying replies
         count = options.ignoreReplies ? maxTimeline : count;
         
@@ -224,7 +234,13 @@ if (typeof renderTwitters != 'function') (function () {
                     return;
                 }
                 
-                var url = 'http://api.twitter.com/1/statuses/' + (options.withFriends ? 'friends_timeline' : 'user_timeline') + '.json?screen_name=' + id + '&callback=twitterCallback' + guid + '&count=' + count + '&cb=' + Math.random();
+                var url = 'http://api.twitter.com/1/statuses/' + (options.withFriends ? 'friends_timeline' : 'user_timeline') + '.json'
+                            + '?screen_name=' + id
+                            + '&callback=twitterCallback' + guid
+                            + '&trim_user=' + (options.trimUser ? 't' : 'f')
+                            + '&include_entities=' + (options.includeEntities ? 't' : 'f')
+                            + '&count=' + count
+                            + '&cb=' + Math.random();
                 
                 if (options.timeout) {
                     window['twitterTimeout' + guid] = setTimeout(function () {
