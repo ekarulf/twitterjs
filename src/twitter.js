@@ -220,8 +220,8 @@ if (typeof renderTwitters != 'function') (function () {
                     return;
                 }
                 
-                var url = 'http://www.twitter.com/statuses/' + (options.withFriends ? 'friends_timeline' : 'user_timeline') + '/' + id + '.json?callback=twitterCallback' + guid + '&count=20&cb=' + Math.random();
-
+                var url = 'http://api.twitter.com/1/statuses/' + (options.withFriends ? 'friends_timeline' : 'user_timeline') + '.json?screen_name=' + id + '&callback=twitterCallback' + guid + '&count=' + count + '&cb=' + Math.random();
+                
                 if (options.timeout) {
                     window['twitterTimeout' + guid] = setTimeout(function () {
                         // cancel callback
